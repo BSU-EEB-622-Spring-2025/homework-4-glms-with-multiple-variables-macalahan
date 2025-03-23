@@ -18,6 +18,9 @@ head(mistletoe)
 
 # Based on the data, we can determine that a poisson or negative binomial is appropriate, before testing for overdispersion. Both of these distributions would work because the number of seedlings in this dataset are discrete, and positively constrained, and we do not have a defined number of possible seedlings. We learned that in poisson, we use lambda, or the rate of success, which is the number of successes * number of trials, which describes the number of occurrences per unit of time or space. In this case, the space is the space under trees surveyed for seedlings. Negative binomial is used instead of poisson when count data is overdispersed, which is common in ecology, so I had to test for that first.
 
+##ASW: right! A Poisson distribution only has one parameter, which describes the mean rate and the "spread" of the distribution... so it assumes the mean and the variance are equal. A negative binomial will estimate that variance separately, which is a better choice if the variance is greater or smaller than the mean. If we apply a poisson when over/under dispersion is present, we will violate the assumptions of this distribution, which will make our p-values inappropriate to interpret!
+
+
 ## The poisson distribution assumes the mean = the variance, it is important to check that the data meet that assumption:
 mean(mistletoe$Seedlings)  #160.6591
 var(mistletoe$Seedlings) #113237.6
@@ -52,6 +55,9 @@ exp(5.7308+-3.1575) # converted to 13.1
 
 # Results support the hypothesis that mistletoe parasitizing trees shifts community composition in forests and influences seedling dispersal underneath trees. The model showed that treatment had a statistically significant effect on seedling density (p-value<0.05). To look at this in biological terms, the number of seedlings counted under parasitized trees averaged 308, while the mean of seedlings underneath unparasitized trees averaged only 13, a difference of 295 seedlings between treatment groups. Mean absolute error was high, calculated at 145.841, so predicted veviated from observed values significantly, indicating that there are other variables that are causing variation that are not included in the model. 
 
+## ASW: lovely work! Great interpretation, and i agree that this is moderate fit -- considering that the values range from 0 to the 2000s (but this is a simpler model than what they fit in the real paper!)
+
+
 ## 1c) During the course of this study, 2012 was an atypically rainy year, compared to 2011. Fit an additional glm that quantifies how the effect of mistletoe differs between the two years in this study. Write ~2 new sentences that summarize the results of the new model and their biological implications.
 
 # first convert year as factor
@@ -73,6 +79,13 @@ predictions(mismod.nbin2, newdata=data.frame(Treatment=c("parasitized", "unparas
 performance::mae(mismod.nbin2) # 140.0407
 
 # This model included the effects of treatment (parasitized and unparasitized) and year as well as treatment:year as an interaction term. The state of the year 2012 as well as the interaction term was found to be just marginally significant (p-value = 0.0717, 0.0599), so we are not seeing that year has a significant effect on seedling numbers. MAE has decreased only slightly to 140.0407, meaning that it is estimated that predictions from the model are still off from real observed values by an average of ~140 seedlings. This is considerable when we consider the number of seedlings ranged from 13 to 308, so we are still missing explanation for variation in the model.
+
+## ASW: number of seedlings ranges from 0 to >2500
+hist(mistletoe$Seedlings)
+
+## ASW: what does the interaction indicate?
+
+## 29/30
 
 ## Question 2:
 
@@ -123,6 +136,8 @@ test_roc #area under curve 0.7096
 
 # If they had not randomly sampled, they could include tree size as another effect in their model to check for significance. However, since it was mentioned in the project description that the researchers resampled the 1000 trees in a randomized fashion by tree size to ensure that small and large stems were recorded equally, so I do not think that the researchers would need to worry about cofounding variables in this case. 
 
+## ASW: excellent! You could include it for other reasons, but it's not needed to accurately estimate the effect of thinning!
+
 ## 2c) Refit the model from 2a to include the necessary variables to minimize bias in our estimation of the “thinning” variable, based on the reviewer’s proposed DAG (above). Does the effect of “thinning” change? If so, describe the degree of change and why the two models may differ in their conclusions. If needed, modify your model interpretation from 2a.
 
 # New model, thinning, slope, and road distance included:
@@ -164,3 +179,12 @@ test_roc2 <- roc(treemortality$mortality
 # AUC = 0.959
 
 # The effect of thinning changed just slightly. Once transformed, we can see that the predicted percentage of tree mortality with the thinned treatment slightly increased from 30 to 31%. The more dramatic change was seen in the predicted morality of trees without thinning treatment, which decreased from 73% in the first model to 53% in the new model that included the other variables. This means that measured slope and road distance variables have significant effects on tree mortality ( also statistically significant in model), and are responsible for variation in the model that was originally not explained in model 1. We can also see that the model was a better fit as the AUC increased to 95.9%, which is excellent in ecological models, and gives us great confidence that results are not due to random chance alone.
+
+## ASW: the effect of thinning is the difference between the unthinned and thinned treatments, so the effect here has changed pretty profoundly. In the original model, there's a >40% decrease in prob of mortality between unthinned and thinned areaws, but in this model, that shifts to only being ~20%. 
+
+## ASW: AUC is not telling us about the results being due to random chance. it's describing the model's ability to classify "0s" and "1s" correctly.  AUC of 1.0 indicates perfect discrimination, while 0.5 indicates that the model isn't classifying values any better than a random guess would (because if we randomly guess about 0s and 1s, we should be right half the time).
+
+## ASW: why do the two models differ in their conclusions?
+## 16/20
+
+## ASW: 45/50 Nice work!!
